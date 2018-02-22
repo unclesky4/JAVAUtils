@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import org.apache.log4j.Logger;
+import org.apache.log4j.PropertyConfigurator;
 import org.apache.poi.hssf.usermodel.HSSFCell;
 import org.apache.poi.hssf.usermodel.HSSFCellStyle;
 import org.apache.poi.hssf.usermodel.HSSFFont;
@@ -26,9 +26,11 @@ import org.apache.poi.ss.usermodel.DateUtil;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
-* POI操作excel
+* POI操作excel   日志：slf4j+log4j
 * @author unclesky4
 * @date Feb 21, 2018 10:10:26 PM
 *
@@ -57,7 +59,8 @@ public class ExcelUtils {
 	 */
 	public Boolean wirteXLS(String sheeetName,Integer row, Integer column, DataBean data, String path) throws IOException {
 		
-		Logger logger = Logger.getLogger(this.getClass());
+		PropertyConfigurator.configure("src/resources/log4j.properties");
+		Logger logger = LoggerFactory.getLogger(this.getClass());
 		
 		String[] tmp = path.split("\\.");
 		if (!"xls".equals(tmp[tmp.length-1]) || !"xls".equals(tmp[tmp.length-1])) {
@@ -141,9 +144,10 @@ public class ExcelUtils {
 	 * @throws IOException 
 	 */
 	public void readXLS(String path) throws IOException {
+		PropertyConfigurator.configure("src/resources/log4j.properties");
 		File file = new File(path);
 		if (!file.exists()) {
-			Logger.getLogger(this.getClass()).error("file not found!");
+			LoggerFactory.getLogger(this.getClass()).error("文件不存在!");
 			return;
 		}
 	    POIFSFileSystem poifsFileSystem = new POIFSFileSystem(new FileInputStream(file));
@@ -206,9 +210,10 @@ public class ExcelUtils {
 	 * @throws InvalidFormatException 
 	 */
 	public void readXLSX(String path) throws InvalidFormatException, IOException {
+		PropertyConfigurator.configure("src/resources/log4j.properties");
 		File file = new File(path);
 		if (!file.exists()) {
-			Logger.getLogger(this.getClass()).error("file not found!");
+			LoggerFactory.getLogger(this.getClass()).error("file not found!");
 			return;
 		}
 		XSSFWorkbook xssfWorkbook = new XSSFWorkbook(file);
@@ -279,7 +284,7 @@ public class ExcelUtils {
 		
 		
 		//读取
-		excelUtils.readXLS("/home/uncle/Desktop/a.xls");
+		excelUtils.readXLS("/home/uncle/Desktop/a/a.xls");
 	}
 
 }
