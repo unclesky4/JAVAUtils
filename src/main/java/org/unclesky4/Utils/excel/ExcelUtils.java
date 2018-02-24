@@ -1,7 +1,6 @@
 package org.unclesky4.Utils.excel;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -10,6 +9,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.apache.log4j.PropertyConfigurator;
+import org.apache.poi.EncryptedDocumentException;
 import org.apache.poi.hssf.usermodel.HSSFCell;
 import org.apache.poi.hssf.usermodel.HSSFCellStyle;
 import org.apache.poi.hssf.usermodel.HSSFFont;
@@ -19,11 +19,14 @@ import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.hssf.util.CellReference;
 import org.apache.poi.hssf.util.HSSFColor;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
-import org.apache.poi.poifs.filesystem.POIFSFileSystem;
+import org.apache.poi.openxml4j.opc.OPCPackage;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.DataFormatter;
 import org.apache.poi.ss.usermodel.DateUtil;
 import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.slf4j.Logger;
@@ -142,30 +145,34 @@ public class ExcelUtils {
 	 * 读取xls文件
 	 * @param path
 	 * @throws IOException 
+	 * @throws InvalidFormatException 
+	 * @throws EncryptedDocumentException 
 	 */
-	public void readXLS(String path) throws IOException {
+	public void readXLS(String path) throws IOException, EncryptedDocumentException, InvalidFormatException {
 		PropertyConfigurator.configure("src/resources/log4j.properties");
 		File file = new File(path);
 		if (!file.exists()) {
 			LoggerFactory.getLogger(this.getClass()).error("文件不存在!");
 			return;
 		}
-	    POIFSFileSystem poifsFileSystem = new POIFSFileSystem(new FileInputStream(file));
-	    HSSFWorkbook hssfWorkbook =  new HSSFWorkbook(poifsFileSystem);
-	    HSSFSheet hssfSheet = hssfWorkbook.getSheetAt(0);
+		
+//	    POIFSFileSystem poifsFileSystem = new POIFSFileSystem(new FileInputStream(file));
+//	    Workbook workbook =  new HSSFWorkbook(poifsFileSystem);
+		Workbook workbook = WorkbookFactory.create(file);
+	    Sheet hssfSheet = workbook.getSheetAt(0);
 
 	    int rowstart = hssfSheet.getFirstRowNum();
 	    int rowEnd = hssfSheet.getLastRowNum();
 	    for(int i=rowstart;i<=rowEnd;i++)
 	    {
-	        HSSFRow row = hssfSheet.getRow(i);
+	        Row row = hssfSheet.getRow(i);
 	        if(null == row) continue;
 	        int cellStart = row.getFirstCellNum();
 	        int cellEnd = row.getLastCellNum();
 
 	        for(int k=cellStart;k<=cellEnd;k++)
 	        {
-	            HSSFCell cell = row.getCell(k);
+	            Cell cell = row.getCell(k);
 	            if(null==cell) continue;
 	            //System.out.print("" + k + "  ");
 	            //System.out.print("type:"+cell.getCellType());
@@ -216,11 +223,12 @@ public class ExcelUtils {
 			LoggerFactory.getLogger(this.getClass()).error("file not found!");
 			return;
 		}
-		XSSFWorkbook xssfWorkbook = new XSSFWorkbook(file);
-	    XSSFSheet xssfSheet = xssfWorkbook.getSheetAt(0);
+//		Workbook workbook = new XSSFWorkbook(file);
+		Workbook workbook = WorkbookFactory.create(OPCPackage.create(file));
+	    Sheet sheet = workbook.getSheetAt(0);
 
 	    DataFormatter formatter = new DataFormatter();
-	    XSSFSheet sheet1 = xssfWorkbook.getSheetAt(0);
+	    Sheet sheet1 = workbook.getSheetAt(0);
 	    for (Row row : sheet1) {
 	        for (Cell cell : row) {
 	            CellReference cellRef = new CellReference(row.getRowNum(), cell.getColumnIndex());
@@ -259,7 +267,7 @@ public class ExcelUtils {
 	    }
 	}
 
-	public static void main(String[] args) throws IOException {
+	public static void main(String[] args) throws IOException, EncryptedDocumentException, InvalidFormatException {
 		ExcelUtils excelUtils = new ExcelUtils();
 		DataBean data = new DataBean();
 		ArrayList<String> titleArray = new ArrayList<>();
